@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PetCenter — Agende o banho</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  /* ====== CORES DA MARCA (troque aqui para outro cliente) ====== */
+  :root{
+    --turquesa:#12aec3; --turquesa-esc:#0b7f90; --rosa:#e8196f; --azul:#1f5bd6; --amarelo:#ffc928;
+    --fundo:#f2fafc; --cartao:#ffffff; --borda:#d5ecf1; --texto:#13323a; --suave:#5d7b83;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;min-width:0}
+  body{overflow-x:clip;font-family:Nunito,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--fundo);color:var(--texto);min-height:100vh}
+
+  /* topo turquesa com patinhas */
+  .topo{background:var(--turquesa);color:#fff;text-align:center;padding:26px 18px 54px;position:relative;overflow:hidden}
+  .topo::before{content:"";position:absolute;inset:0;opacity:.13;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90' viewBox='0 0 64 64' fill='white'%3E%3Cellipse cx='18' cy='24' rx='6' ry='8'/%3E%3Cellipse cx='32' cy='16' rx='6' ry='8'/%3E%3Cellipse cx='46' cy='24' rx='6' ry='8'/%3E%3Cpath d='M32 30c-9 0-17 10-17 18 0 6 5 8 9 8 4 0 5-2 8-2s4 2 8 2c4 0 9-2 9-8 0-8-8-18-17-18z'/%3E%3C/svg%3E");
+    background-size:90px;transform:rotate(-12deg) scale(1.3)}
+  .topo>*{position:relative}
+  .selo{width:86px;height:86px;border-radius:50%;background:#fff;margin:0 auto 10px;display:grid;place-items:center;box-shadow:0 6px 0 rgba(0,0,0,.08)}
+  .marca{font-family:"Baloo 2",Nunito,sans-serif;font-weight:800;font-size:2.1rem;line-height:1;letter-spacing:-.5px}
+  .marca b{color:var(--amarelo)}
+  .slogan{font-weight:700;opacity:.95;margin-top:4px}
+  .abas{display:inline-flex;gap:4px;margin-top:16px;background:rgba(255,255,255,.18);padding:4px;border-radius:30px}
+  .abas button{background:none;border:none;color:#fff;padding:9px 16px;border-radius:24px;font:inherit;font-weight:800;font-size:.84rem;cursor:pointer;min-height:40px}
+  .abas button.sel{background:#fff;color:var(--turquesa-esc)}
+
+  .app{max-width:480px;margin:-34px auto 0;padding:0 16px 130px;position:relative}
+  .painel{background:var(--cartao);border-radius:26px;padding:22px 18px;box-shadow:0 10px 30px -18px rgba(11,127,144,.5)}
+
+  .passos{display:flex;gap:6px;margin-bottom:18px}
+  .passos span{flex:1;height:6px;border-radius:3px;background:var(--borda);transition:.3s}
+  .passos span.ativo{background:var(--rosa)}
+
+  h2{font-family:"Baloo 2",Nunito,sans-serif;font-size:1.45rem;font-weight:800;line-height:1.1;color:var(--turquesa-esc)}
+  .dica{color:var(--suave);font-size:.88rem;margin:4px 0 16px}
+
+  .lista{display:grid;gap:10px}
+  .opcao{background:var(--cartao);border:2px solid var(--borda);border-radius:18px;padding:13px 14px;display:flex;align-items:center;gap:13px;cursor:pointer;text-align:left;color:inherit;font:inherit;width:100%;transition:.15s;min-height:66px}
+  .opcao:hover{border-color:var(--turquesa)}
+  .opcao.sel{border-color:var(--turquesa);background:#e9f8fb}
+  .opcao .ico{font-size:1.6rem;width:46px;height:46px;border-radius:15px;background:var(--fundo);display:grid;place-items:center;flex:none}
+  .opcao .info{flex:1}
+  .opcao .nome{font-weight:800}
+  .opcao .det{color:var(--suave);font-size:.8rem;margin-top:1px}
+  .opcao .preco{color:var(--rosa);font-weight:800;white-space:nowrap}
+  .opcao .preco small{display:block;font-size:.68rem;color:var(--suave);font-weight:700;text-align:right}
+
+  .unidade .ico{background:var(--turquesa);color:#fff}
+  .unidade .det{line-height:1.35}
+
+  .dias{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:16px;scrollbar-width:none}
+  .dia{flex:0 0 62px;background:var(--cartao);border:2px solid var(--borda);border-radius:16px;padding:9px 0;text-align:center;cursor:pointer;color:inherit;font:inherit}
+  .dia small{display:block;color:var(--suave);font-size:.7rem;font-weight:800;text-transform:uppercase}
+  .dia b{font-size:1.3rem;font-weight:800}
+  .dia.sel{background:var(--turquesa);color:#fff;border-color:var(--turquesa)}
+  .dia.sel small{color:#dff7fb}
+
+  .horas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .hora{background:var(--cartao);border:2px solid var(--borda);border-radius:14px;padding:10px 0;cursor:pointer;color:inherit;font:inherit;font-weight:800;font-size:1rem;min-height:54px}
+  .hora small{display:block;font-size:.68rem;color:var(--suave);font-weight:700}
+  .hora.sel{background:var(--turquesa);color:#fff;border-color:var(--turquesa)}
+  .hora.sel small{color:#dff7fb}
+  .hora:disabled{opacity:.35;cursor:not-allowed}
+
+  label.campo{display:block;font-size:.85rem;font-weight:800;color:var(--suave);margin:14px 0 6px}
+  input[type=text],input[type=tel],textarea{width:100%;background:var(--fundo);border:2px solid var(--borda);border-radius:14px;padding:13px 14px;color:var(--texto);font:inherit;font-size:1rem}
+  textarea{resize:vertical;min-height:66px}
+  input:focus,textarea:focus{outline:none;border-color:var(--turquesa);background:#fff}
+  .linha{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+
+  .extras{display:grid;gap:8px;margin-top:16px}
+  .extra{display:flex;align-items:center;gap:12px;border:2px solid var(--borda);border-radius:16px;padding:12px 14px;cursor:pointer}
+  .extra:has(input:checked){border-color:var(--rosa);background:#fff0f6}
+  .extra input{width:22px;height:22px;accent-color:var(--rosa);flex:none}
+  .extra .t{flex:1}
+  .extra b{display:block;font-size:.95rem}
+  .extra span{font-size:.8rem;color:var(--suave)}
+  .extra em{font-style:normal;font-weight:800;color:var(--rosa);white-space:nowrap}
+
+  .resumo{background:var(--fundo);border-radius:18px;padding:4px 16px;margin-top:16px}
+  .resumo div{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px dashed var(--borda);font-size:.92rem}
+  .resumo div:last-child{border:none}
+  .resumo span{color:var(--suave)}
+  .resumo b{text-align:right}
+  .resumo .total b{font-size:1.2rem;color:var(--rosa)}
+
+  .rodape{position:fixed;left:0;right:0;bottom:0;background:linear-gradient(transparent,var(--fundo) 30%);padding:26px 16px 16px;z-index:5}
+  .rodape .in{max-width:480px;margin:0 auto;display:flex;gap:10px}
+  .btn{flex:1;border:none;border-radius:18px;padding:16px;font:inherit;font-weight:800;font-size:1.02rem;cursor:pointer;min-height:56px}
+  .btn.pri{background:var(--rosa);color:#fff;box-shadow:0 6px 0 #b10f53}
+  .btn.pri:active{transform:translateY(3px);box-shadow:0 3px 0 #b10f53}
+  .btn.pri:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}
+  .btn.sec{flex:0 0 auto;min-width:56px;background:var(--cartao);color:var(--texto);border:2px solid var(--borda)}
+  .btn.zap{background:#25d366;color:#fff;width:100%;margin-top:16px;display:block;text-decoration:none;text-align:center}
+  .nota-zap{font-size:.8rem;color:var(--suave);margin-top:10px;text-align:center}
+
+  .sucesso{text-align:center}
+  .bolha{width:92px;height:92px;border-radius:50%;background:var(--amarelo);display:grid;place-items:center;margin:0 auto 12px;font-size:2.8rem;animation:pula .6s ease}
+  @keyframes pula{0%{transform:scale(.4)}70%{transform:scale(1.1)}100%{transform:scale(1)}}
+
+  .filtro{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+  .filtro button{border:2px solid var(--borda);background:#fff;border-radius:20px;padding:7px 13px;font:inherit;font-weight:800;font-size:.8rem;color:var(--suave);cursor:pointer}
+  .filtro button.sel{border-color:var(--turquesa);color:var(--turquesa-esc);background:#e9f8fb}
+  .item{border:2px solid var(--borda);border-radius:16px;padding:12px 14px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start}
+  .item .h{font-weight:800;color:var(--turquesa-esc);font-size:1.05rem;width:50px;flex:none}
+  .item .c{flex:1;font-size:.92rem}
+  .item .c span{display:block;color:var(--suave);font-size:.78rem;line-height:1.4}
+  .tags{flex:none;display:flex;flex-direction:column;gap:4px;align-items:flex-end}
+  .tag{font-size:.68rem;font-weight:800;padding:3px 8px;border-radius:10px;white-space:nowrap;background:#e9f8fb;color:var(--turquesa-esc)}
+  .tag.r{background:#fff0f6;color:var(--rosa)}
+  .vazio{color:var(--suave);text-align:center;padding:26px 0}
+  .aviso{font-size:.72rem;color:var(--suave);text-align:center;margin-top:20px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="topo">
+  <div class="selo" aria-hidden="true">
+    <svg width="50" height="50" viewBox="0 0 64 64"><g fill="#e8196f"><ellipse cx="18" cy="24" rx="6" ry="8"/><ellipse cx="46" cy="24" rx="6" ry="8"/></g><g fill="#1f5bd6"><ellipse cx="32" cy="16" rx="6" ry="8"/><path d="M32 30c-9 0-17 10-17 18 0 6 5 8 9 8 4 0 5-2 8-2s4 2 8 2c4 0 9-2 9-8 0-8-8-18-17-18z"/></g></svg>
+  </div>
+  <div class="marca">Pet<b>Center</b></div>
+  <p class="slogan" id="slogan"></p>
+  <div class="abas">
+    <button id="aba-cliente" class="sel">Agendar banho</button>
+    <button id="aba-loja">Agenda da loja</button>
+  </div>
+</div>
+
+<div class="app">
+  <div class="painel" id="tela"></div>
+  <p class="aviso">Demonstração · valores e horários de exemplo · desenvolvido por Erick Boteleiro</p>
+</div>
+<div class="rodape" id="rodape"></div>
+
+<script>
+{
+/* ==========================================================
+   CONFIGURAÇÃO — confirmar tudo com a PetCenter
+   ========================================================== */
+const NEGOCIO = {
+  slogan: "Seu melhor amigo em boas mãos! 🐾",
+  demonstracao: true,      // true = o botão do WhatsApp não envia nada
+  diasFechado: [0],        // 0 = domingo
+  abre: 8, fecha: 17, intervaloMin: 60,
+  capacidade: 2,           // pets por horário em cada unidade
+};
+const UNIDADES = [
+  {id:"acarape", nome:"Acarape",        end:"Rua Henrique Bessa, 243 · Centro", tel:"(85) 98648-6831", whatsapp:"5585986486831"},
+  {id:"diogo",   nome:"Antônio Diogo",  end:"Rua José Carvalho, 71 · Centro",   tel:"(85) 99957-7364", whatsapp:"5585999577364"},
+];
+const QUEM = [
+  {id:"P", ico:"🐶", nome:"Cãozinho pequeno", det:"Até 10 kg · Shih-tzu, Lhasa, Yorkshire"},
+  {id:"M", ico:"🐕", nome:"Cão médio",        det:"10 a 25 kg · Beagle, Cocker, Border"},
+  {id:"G", ico:"🦮", nome:"Cão grande",       det:"Acima de 25 kg · Labrador, Golden"},
+  {id:"C", ico:"🐱", nome:"Gatinho",          det:"Banho especial para felinos"},
+];
+const SERVICOS = [ // preço por porte — valores de exemplo
+  {id:"banho", ico:"🛁", nome:"Banho",                  det:"Cheirinho de banho e muita fofura", preco:{P:45,M:60,G:80,C:60}},
+  {id:"hig",   ico:"✂️", nome:"Banho + Tosa higiênica", det:"Patinhas, barriga e rostinho",      preco:{P:60,M:75,G:95,C:75}},
+  {id:"tosa",  ico:"🐩", nome:"Banho + Tosa completa",  det:"Na máquina ou na tesoura",          preco:{P:80,M:100,G:130,C:95}},
+  {id:"hidra", ico:"💧", nome:"Banho + Hidratação",     det:"Pelo macio e brilhante",            preco:{P:65,M:85,G:110,C:80}},
+  {id:"unha",  ico:"🐾", nome:"Só corte de unhas",      det:"Rapidinho, sem banho",              preco:{P:15,M:20,G:25,C:20}},
+];
+const EXTRAS = [
+  {id:"dente", nome:"Escovação dental", det:"Mau hálito não é normal! 😉", valor:10},
+  {id:"taxi",  nome:"Táxi Dog",         det:"Buscamos e levamos seu pet em casa", valor:15},
+];
+/* ========================================================== */
+
+const DIAS=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+const real=v=>"R$ "+v.toFixed(2).replace(".",",");
+const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+const $=id=>document.getElementById(id);
+const dataBR=s=>{const d=new Date(s+"T12:00");return `${DIAS[d.getDay()]}, ${d.toLocaleDateString("pt-BR")}`};
+const limpa=s=>String(s).replace(/[<>&"]/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;"}[c]));
+
+function ler(){try{return JSON.parse(localStorage.getItem("agenda-petcenter-demo")||"[]")}catch(e){return []}}
+function salvar(a){try{localStorage.setItem("agenda-petcenter-demo",JSON.stringify(a))}catch(e){}}
+let agenda=ler();
+
+let passo=0, aba="cliente", filtroLoja="todas";
+const esc={unidade:null,quem:null,servico:null,dia:null,hora:null,extras:[],pet:"",raca:"",tutor:"",tel:"",obs:""};
+const TOTAL_PASSOS=5;
+
+function proximosDias(n=10){const o=[],d=new Date();d.setHours(0,0,0,0);while(o.length<n){if(!NEGOCIO.diasFechado.includes(d.getDay()))o.push(new Date(d));d.setDate(d.getDate()+1)}return o}
+function horarios(){const o=[];for(let m=NEGOCIO.abre*60;m<NEGOCIO.fecha*60;m+=NEGOCIO.intervaloMin)o.push(String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0"));return o}
+function ficticios(k){let h=0;for(const c of k)h=(h*31+c.charCodeAt(0))%997;return h%4===0?2:(h%3===0?1:0)}
+function vagas(un,dia,hora){
+  const ag=new Date();
+  if(dia===iso(ag)){const[hh,mm]=hora.split(":").map(Number);if(hh*60+mm<=ag.getHours()*60+ag.getMinutes())return 0}
+  const usados=agenda.filter(a=>a.unidade===un&&a.dia===dia&&a.hora===hora).length+ficticios(un+dia+hora);
+  return Math.max(0,NEGOCIO.capacidade-usados);
+}
+const precoServ=()=>esc.servico.preco[esc.quem.id];
+const total=()=>precoServ()+EXTRAS.filter(e=>esc.extras.includes(e.id)).reduce((s,e)=>s+e.valor,0);
+
+function rodape(h){$("rodape").innerHTML=h?`<div class="in">${h}</div>`:""}
+function barra(){return `<div class="passos">${Array.from({length:TOTAL_PASSOS},(_,i)=>`<span class="${i<=passo?"ativo":""}"></span>`).join("")}</div>`}
+const voltar=()=>`<button class="btn sec" data-acao="voltar" aria-label="Voltar">←</button>`;
+
+function render(){
+  if(aba==="loja")return renderLoja();
+  const T=$("tela");
+  if(passo===0){
+    T.innerHTML=barra()+`<h2>Em qual unidade?</h2><p class="dica">Escolha a PetCenter mais pertinho de você</p><div class="lista">`+
+      UNIDADES.map(u=>`<button class="opcao unidade ${esc.unidade?.id===u.id?"sel":""}" data-un="${u.id}"><span class="ico">📍</span>
+        <span class="info"><div class="nome">PetCenter ${u.nome}</div><div class="det">${u.end}<br>${u.tel}</div></span></button>`).join("")+`</div>`;
+    rodape("");
+  }
+  else if(passo===1){
+    T.innerHTML=barra()+`<h2>Quem vem pro banho?</h2><p class="dica">O valor muda conforme o tamanho do aumiguinho</p><div class="lista">`+
+      QUEM.map(q=>`<button class="opcao ${esc.quem?.id===q.id?"sel":""}" data-quem="${q.id}"><span class="ico">${q.ico}</span>
+        <span class="info"><div class="nome">${q.nome}</div><div class="det">${q.det}</div></span></button>`).join("")+`</div>`;
+    rodape(voltar());
+  }
+  else if(passo===2){
+    T.innerHTML=barra()+`<h2>O que vai ser hoje?</h2><p class="dica">${esc.quem.nome} · PetCenter ${esc.unidade.nome}</p><div class="lista">`+
+      SERVICOS.map(s=>`<button class="opcao ${esc.servico?.id===s.id?"sel":""}" data-serv="${s.id}"><span class="ico">${s.ico}</span>
+        <span class="info"><div class="nome">${s.nome}</div><div class="det">${s.det}</div></span><span class="preco">${real(s.preco[esc.quem.id])}</span></button>`).join("")+`</div>`;
+    rodape(voltar());
+  }
+  else if(passo===3){
+    const dias=proximosDias(); if(!esc.dia)esc.dia=iso(dias[0]);
+    const hs=horarios(), un=esc.unidade.id, livres=hs.filter(h=>vagas(un,esc.dia,h)>0);
+    T.innerHTML=barra()+`<h2>Quando?</h2><p class="dica">Horários livres em ${esc.unidade.nome}</p>
+      <div class="dias">${dias.map(d=>`<button class="dia ${iso(d)===esc.dia?"sel":""}" data-dia="${iso(d)}"><small>${DIAS[d.getDay()]}</small><b>${d.getDate()}</b></button>`).join("")}</div>
+      ${livres.length?`<div class="horas">${hs.map(h=>{const v=vagas(un,esc.dia,h);return `<button class="hora ${esc.hora===h?"sel":""}" data-hora="${h}" ${v?"":"disabled"}>${h}<small>${v?(v===1?"última vaga":v+" vagas"):"lotado"}</small></button>`}).join("")}</div>`
+        :`<p class="vazio">Agenda cheia neste dia 🐾<br>Escolha outro dia.</p>`}`;
+    rodape(voltar()+`<button class="btn pri" data-acao="avancar" ${esc.hora?"":"disabled"}>Continuar</button>`);
+  }
+  else if(passo===4){
+    T.innerHTML=barra()+`<h2>Quase pronto!</h2><p class="dica">Conta pra gente sobre o seu pet</p>
+      <div class="linha">
+        <div><label class="campo" for="pet">Nome do pet</label><input type="text" id="pet" value="${limpa(esc.pet)}" placeholder="Ex.: Amora"></div>
+        <div><label class="campo" for="raca">Raça</label><input type="text" id="raca" value="${limpa(esc.raca)}" placeholder="Ex.: Poodle"></div>
+      </div>
+      <label class="campo" for="tutor">Seu nome</label><input type="text" id="tutor" value="${limpa(esc.tutor)}" placeholder="Nome do tutor">
+      <label class="campo" for="tel">Seu WhatsApp</label><input type="tel" id="tel" value="${limpa(esc.tel)}" inputmode="tel" placeholder="(85) 99999-9999">
+      <label class="campo" for="obs">Alguma observação?</label><textarea id="obs" placeholder="Alergias, se é bravinho, se tem medo de secador...">${limpa(esc.obs)}</textarea>
+      <div class="extras">${EXTRAS.map(e=>`<label class="extra"><input type="checkbox" data-extra="${e.id}" ${esc.extras.includes(e.id)?"checked":""}>
+        <span class="t"><b>${e.nome}</b><span>${e.det}</span></span><em>+${real(e.valor)}</em></label>`).join("")}</div>
+      <div class="resumo">
+        <div><span>Unidade</span><b>${esc.unidade.nome}</b></div>
+        <div><span>Serviço</span><b>${esc.servico.nome}</b></div>
+        <div><span>Quando</span><b>${dataBR(esc.dia)} às ${esc.hora}</b></div>
+        <div class="total"><span>Total</span><b id="total">${real(total())}</b></div>
+      </div>`;
+    rodape(voltar()+`<button class="btn pri" id="confirmar" data-acao="confirmar">Confirmar agendamento</button>`);
+    checar();
+  }
+  else if(passo===5){
+    const u=esc.unidade, ex=EXTRAS.filter(e=>esc.extras.includes(e.id)).map(e=>e.nome);
+    const msg=`Olá, PetCenter ${u.nome}! Agendei pelo site 🐾\n${esc.servico.nome} · ${esc.quem.nome}\nPet: ${esc.pet}${esc.raca?" ("+esc.raca+")":""}\n📅 ${dataBR(esc.dia)} às ${esc.hora}${ex.length?"\n➕ "+ex.join(", "):""}\nTutor: ${esc.tutor}\nTotal: ${real(total())}`;
+    const link=`https://wa.me/${u.whatsapp}?text=${encodeURIComponent(msg)}`;
+    T.innerHTML=`<div class="sucesso"><div class="bolha">🛁</div><h2>Agendado! O banho do ${limpa(esc.pet)} tá garantido</h2>
+      <p class="dica">Te esperamos na PetCenter ${u.nome}</p>
+      <div class="resumo" style="text-align:left">
+        <div><span>Quando</span><b>${dataBR(esc.dia)} às ${esc.hora}</b></div>
+        <div><span>Serviço</span><b>${esc.servico.nome}</b></div>
+        ${ex.length?`<div><span>Extras</span><b>${ex.join(", ")}</b></div>`:""}
+        <div><span>Endereço</span><b>${u.end}</b></div>
+        <div class="total"><span>Total</span><b>${real(total())}</b></div>
+      </div>
+      ${NEGOCIO.demonstracao
+        ?`<button class="btn zap" data-acao="zapdemo">Confirmar pelo WhatsApp</button><p class="nota-zap">Na versão final, abre a conversa com a unidade ${u.nome} · ${u.tel}, com o agendamento já escrito.</p>`
+        :`<a class="btn zap" href="${link}" target="_blank" rel="noopener">Confirmar pelo WhatsApp</a>`}</div>`;
+    rodape(`<button class="btn sec" style="flex:1" data-acao="novo">Agendar outro aumiguinho</button>`);
+  }
+}
+function checar(){const b=$("confirmar");if(b)b.disabled=!(esc.pet.trim()&&esc.tutor.trim().length>1&&esc.tel.replace(/\D/g,"").length>=10)}
+
+function renderLoja(){
+  const hoje=iso(new Date());
+  const lista=agenda.filter(a=>a.dia>=hoje&&(filtroLoja==="todas"||a.unidade===filtroLoja)).sort((a,b)=>(a.dia+a.hora).localeCompare(b.dia+b.hora));
+  const porDia={}; lista.forEach(a=>(porDia[a.dia]||=[]).push(a));
+  $("tela").innerHTML=`<h2>Agenda de banho & tosa</h2><p class="dica">Agendamentos feitos pelo link, por unidade</p>
+    <div class="filtro">${[{id:"todas",nome:"Todas"},...UNIDADES].map(u=>`<button class="${filtroLoja===u.id?"sel":""}" data-filtro="${u.id}">${u.nome}</button>`).join("")}</div>`+
+    (lista.length?Object.entries(porDia).map(([dia,it])=>`<p class="dica" style="margin:14px 0 8px;color:var(--turquesa-esc);font-weight:800">${dataBR(dia)}</p>`+
+      it.map(a=>`<div class="item"><span class="h">${a.hora}</span><span class="c"><b>${limpa(a.pet)}</b>${a.raca?" · "+limpa(a.raca):""}
+        <span>${limpa(a.servico)} · ${a.quem}<br>Tutor: ${limpa(a.tutor)} · ${limpa(a.tel)}${a.extras.length?"<br>➕ "+a.extras.join(", "):""}${a.obs?"<br>⚠️ "+limpa(a.obs):""}</span></span>
+        <span class="tags"><span class="tag">${a.unidadeNome}</span>${a.extras.includes("Táxi Dog")?`<span class="tag r">🚗 Buscar</span>`:""}</span></div>`).join("")).join("")
+     :`<p class="vazio">Nenhum agendamento ainda.<br>Faça um teste na aba "Agendar banho" 🐶</p>`);
+  rodape(agenda.length?`<button class="btn sec" style="flex:1" data-acao="limpar">Limpar testes</button>`:"");
+}
+function mudarAba(a){aba=a;$("aba-cliente").classList.toggle("sel",a==="cliente");$("aba-loja").classList.toggle("sel",a==="loja");render()}
+
+document.addEventListener("click",e=>{
+  const t=e.target.closest("button"); if(!t)return;
+  if(t.id==="aba-cliente")return mudarAba("cliente");
+  if(t.id==="aba-loja")return mudarAba("loja");
+  const d=t.dataset;
+  if(d.un){esc.unidade=UNIDADES.find(u=>u.id===d.un);esc.hora=null;passo=1;return render()}
+  if(d.quem){esc.quem=QUEM.find(q=>q.id===d.quem);passo=2;return render()}
+  if(d.serv){esc.servico=SERVICOS.find(s=>s.id===d.serv);passo=3;return render()}
+  if(d.dia){esc.dia=d.dia;esc.hora=null;return render()}
+  if(d.hora){esc.hora=d.hora;return render()}
+  if(d.filtro){filtroLoja=d.filtro;return render()}
+  const a=d.acao;
+  if(a==="voltar"){passo--;render()}
+  else if(a==="avancar"){passo=4;render()}
+  else if(a==="confirmar"){
+    if(vagas(esc.unidade.id,esc.dia,esc.hora)<=0){passo=3;esc.hora=null;return render()}
+    agenda.push({unidade:esc.unidade.id,unidadeNome:esc.unidade.nome,dia:esc.dia,hora:esc.hora,servico:esc.servico.nome,quem:esc.quem.nome,
+      pet:esc.pet.trim(),raca:esc.raca.trim(),tutor:esc.tutor.trim(),tel:esc.tel,obs:esc.obs.trim(),
+      extras:EXTRAS.filter(x=>esc.extras.includes(x.id)).map(x=>x.nome),total:total()});
+    salvar(agenda);passo=5;render();window.scrollTo({top:0,behavior:"smooth"});
+  }
+  else if(a==="novo"){Object.assign(esc,{quem:null,servico:null,dia:null,hora:null,extras:[],pet:"",raca:"",obs:""});passo=0;render()}
+  else if(a==="zapdemo"){t.textContent="✔ Mensagem pronta para a unidade"}
+  else if(a==="limpar"){if(d.ok){agenda=[];salvar(agenda);render()}else{d.ok=1;t.textContent="Toque de novo para apagar"}}
+});
+document.addEventListener("input",e=>{
+  const id=e.target.id;
+  if(["pet","raca","tutor","tel","obs"].includes(id)){esc[id]=e.target.value;checar()}
+});
+document.addEventListener("change",e=>{
+  const x=e.target.dataset.extra; if(!x)return;
+  esc.extras=e.target.checked?[...new Set([...esc.extras,x])]:esc.extras.filter(i=>i!==x);
+  const el=$("total"); if(el)el.textContent=real(total());
+});
+
+$("slogan").textContent=NEGOCIO.slogan;
+render();
+}
+</script>
+</body>
+</html>
